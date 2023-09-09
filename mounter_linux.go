@@ -22,7 +22,7 @@ func DetectAndMount() ([]string, error) {
 	if err != nil {
 		log.Printf("Error calling udisk: %s", err)
 	}
-	fmt.Println(string(out))
+
 	s := bufio.NewScanner(bytes.NewReader(out))
 	for s.Scan() {
 		line := s.Text()
