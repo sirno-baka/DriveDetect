@@ -16,7 +16,7 @@ func DetectAndMount() ([]string, error) {
 	var drives []string
 	driveMap := make(map[string]string)
 	unmountedStorages := []string{}
-	udiskPattern := regexp.MustCompile("^(\\S+)\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+(part)\\s*(.*$)")
+	udiskPattern := regexp.MustCompile("^(\\S+)\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+(part) (.*$)")
 
 	out, err := exec.Command("lsblk", "--list").Output()
 
