@@ -3,6 +3,7 @@ package usbdrivedetect
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -10,8 +11,6 @@ import (
 	"strings"
 )
 
-// Detect returns a list of file paths pointing to the root folder of
-// USB storage devices connected to the system.
 func DetectAndMount() ([]string, error) {
 	var drives []string
 	driveMap := make(map[string]string)
@@ -19,11 +18,11 @@ func DetectAndMount() ([]string, error) {
 	udiskPattern := regexp.MustCompile("^(\\S+)\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+(part) (.*$)")
 
 	out, err := exec.Command("lsblk", "--list").Output()
-
+	exec.Command("partprobe")
 	if err != nil {
 		log.Printf("Error calling udisk: %s", err)
 	}
-
+	fmt.Println(string(out))
 	s := bufio.NewScanner(bytes.NewReader(out))
 	for s.Scan() {
 		line := s.Text()
@@ -53,11 +52,9 @@ func DetectAndMount() ([]string, error) {
 		return drives, nil
 	}
 
-	// trying mount
-	udiskctlMountedOutPattern := regexp.MustCompile("at (.*)")
-
 	for _, device := range unmountedStorages {
-		out, err := exec.Command("udisksctl", "mount", "-b", "/dev/"+device).Output()
+		mountPoint := "/media"
+		_, err := exec.Command("mount", "/dev/"+device, mountPoint).Output()
 		if err != nil {
 			switch err := err.(type) {
 			case *exec.ExitError:
@@ -68,16 +65,17 @@ func DetectAndMount() ([]string, error) {
 
 			continue
 		}
-		if udiskctlMountedOutPattern.MatchString(string(out)) {
-			mountPoint := udiskctlMountedOutPattern.FindStringSubmatch(string(out))[1]
-			file, err := os.Open(mountPoint)
-			if err == nil {
-				drives = append(drives, mountPoint)
-				file.Close()
-			} else {
-				exec.Command("udisksctl", "unmount", "-b", "/dev/"+device)
-			}
+
+		fmt.Println("Mounted as", mountPoint)
+		file, err := os.Open(mountPoint)
+		if err == nil {
+			drives = append(drives, mountPoint)
+			file.Close()
+		} else {
+			fmt.Println("Err test open", err.Error())
+			exec.Command("unmount", "/media")
 		}
+
 	}
 
 	return drives, nil
