@@ -1,4 +1,4 @@
-package drivedetect
+package usbdrivedetect
 
 import (
 	"bufio"

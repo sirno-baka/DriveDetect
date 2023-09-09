@@ -1,1 +1,1 @@
-module drivedetect
+module usbdrivedetect
