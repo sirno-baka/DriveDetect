@@ -59,7 +59,7 @@ func DetectAndMount() ([]string, error) {
 	for _, device := range unmountedStorages {
 		out, err := exec.Command("udisksctl", "mount", "-b", "/dev/"+device).Output()
 		if err != nil {
-			log.Printf("Error calling udisksctl mount -b : %s", err.(*exec.ExitError).Stderr)
+			log.Printf("Error calling udisksctl mount -b : %s", err)
 			continue
 		}
 		if udiskctlMountedOutPattern.MatchString(string(out)) {
